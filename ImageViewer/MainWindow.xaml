@@ -1,0 +1,55 @@
+﻿<Window x:Class="ImageViewer.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ImageViewer"
+        mc:Ignorable="d"
+        Title="MainWindow" Width="640" Height="480"
+        SizeChanged="Window_SizeChanged">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <Menu Grid.Row="1">
+            <MenuItem Header="ファイル" Click="MenuItem_Click"/>
+            <MenuItem Name="Overall" Header="全体表示" Click="Overall_Click" />
+            <MenuItem Name="Magnification" Header="等倍表示" Click="Magnification_Click" />
+            <MenuItem Name="Expansion" Header="拡大" Click="Expansion_Click" />
+            <MenuItem Name="Shrinking" Header="縮小" Click="Shrinking_Click" />
+            <MenuItem Name="RightRotation" Header="右90°" Click="RightRotation_Click" />
+            <MenuItem Name="LeftRotation" Header="左90°" Click="LeftRotation_Click" />
+        </Menu>
+        <Grid Grid.Row="2" Name="ScrollGrid" 
+              Background="Gray" >
+            <ScrollViewer Name="ScrollViewImage" 
+                         Loaded="ScrollViewImage_Loaded"
+                         Background ="Transparent" >
+                <Grid 
+                      Background="Transparent"
+                      MouseLeftButtonDown="Grid_MouseLeftButtonDown" MouseLeftButtonUp="Grid_MouseLeftButtonUp" MouseMove="Grid_MouseMove" MouseLeave="Grid_MouseLeave"
+                      >
+                    <Image x:Name="ViewImage"  
+                       Stretch="Uniform" 
+                       HorizontalAlignment="Center" VerticalAlignment="Center"
+                       RenderTransformOrigin="0.5,0.5"
+                       RenderOptions.BitmapScalingMode="NearestNeighbor" >
+                        <Image.LayoutTransform>
+                            <TransformGroup>
+                                <ScaleTransform x:Name="st"/>
+                                <RotateTransform x:Name="rt"/>
+                            </TransformGroup>
+                        </Image.LayoutTransform>
+                    </Image>
+                    <Rectangle  Name="ViewRectangle"
+                        HorizontalAlignment="Left" VerticalAlignment="Top"
+                        StrokeDashArray="2,2" Stroke="Yellow" StrokeThickness="3"
+                        Visibility="Collapsed"/>
+                </Grid>
+            </ScrollViewer>
+        </Grid>
+    </Grid>
+
+</Window>
