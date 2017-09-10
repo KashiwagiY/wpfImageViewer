@@ -22,29 +22,50 @@ namespace ImageViewer
     /// </summary>
     public partial class MainWindow : Window
     {
-        int scaleValue = 0;
+        /// <summary>
+        /// スケールリストのインデックス
+        /// </summary>
+        int scaleIndices = 0;
+
+        /// <summary>
+        /// スケールリスト
+        /// </summary>
         double[] scaleList = { 1, 2, 4, 6, 8, 12 };
-        double scale;
+
+        /// <summary>
+        /// 現在のスケール
+        /// </summary>
+        double scale = 0;
+
+        // 現在のアングル
         double angle = 0;
-        const double MaxScale = 10;
-        const double MinScale = 1;
-        double RectDownX;
-        double RectDownY;
-        double DownX;
-        double DownY;
+
+        /// <summary>
+        /// 矩形表示用座標
+        /// </summary>
+        Point RectDown;
+
+        /// <summary>
+        /// スケール計算用
+        /// </summary>
+        Point Down;
+        
 
         public MainWindow()
         {
             InitializeComponent();
             ScrollViewImage.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
             ScrollViewImage.HorizontalScrollBarVisibility = ScrollBarVisibility.Auto;
-            RectDownX = 0;
-            RectDownY = 0;
-            DownX = 0;
-            DownY = 0;
-            scaleValue = 0;
+            RectDown = new Point(0,0);
+            Down = new Point(0,0);
+            scaleIndices = 0;
         }
 
+        /// <summary>
+        /// ファイルボタン
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void MenuItem_Click(object sender, RoutedEventArgs e)
         {
             string fileName;
@@ -54,19 +75,32 @@ namespace ImageViewer
             MagnificationView();
 
         }
-        // 全体
+
+        /// <summary>
+        /// 全体表示ボタン
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Overall_Click(object sender, RoutedEventArgs e)
         {
             OverallView();
         }
 
-        // 等倍
+        /// <summary>
+        /// 等倍表示ボタン
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Magnification_Click(object sender, RoutedEventArgs e)
         {
             MagnificationView();
         }
 
-        // 拡大
+        /// <summary>
+        /// 拡大ボタン
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Expansion_Click(object sender, RoutedEventArgs e)
         {
             if (ViewImage.Source == null)
@@ -76,33 +110,41 @@ namespace ImageViewer
             ScrollViewImage.VerticalScrollBarVisibility = ScrollBarVisibility.Visible;
             ScrollViewImage.HorizontalScrollBarVisibility = ScrollBarVisibility.Visible;
 
-            scaleValue++;
-            if (scaleValue >= scaleList.Count())
+            scaleIndices++;
+            if (scaleIndices >= scaleList.Count())
             {
-                scaleValue = scaleList.Count() - 1;
+                scaleIndices = scaleList.Count() - 1;
             }
-            ImageTransform(scaleList[scaleValue]);
+            ImageTransform(scaleList[scaleIndices]);
         }
 
-        // 縮小
+        /// <summary>
+        /// 縮小ボタン
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Shrinking_Click(object sender, RoutedEventArgs e)
         {
             if (ViewImage.Source == null)
             {
                 return;
             }
-            scaleValue--;
-            if (scaleValue <= 0)
+            scaleIndices--;
+            if (scaleIndices <= 0)
             {
                 ScrollViewImage.VerticalScrollBarVisibility = ScrollBarVisibility.Disabled;
                 ScrollViewImage.HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled;
-                scaleValue = 0;
+                scaleIndices = 0;
             }
-            ImageTransform(scaleList[scaleValue]);
+            ImageTransform(scaleList[scaleIndices]);
 
         }
 
-        // 右回転
+        /// <summary>
+        /// 右回転ボタン
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void RightRotation_Click(object sender, RoutedEventArgs e)
         {
             if (ViewImage.Source == null)
@@ -114,10 +156,14 @@ namespace ImageViewer
             {
                 angle = 0;
             }
-            ImageTransform(scaleList[scaleValue]);
+            ImageTransform(scaleList[scaleIndices]);
         }
 
-        // 左回転
+        /// <summary>
+        /// 左回転ボタン
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void LeftRotation_Click(object sender, RoutedEventArgs e)
         {
             if (ViewImage.Source == null)
@@ -129,7 +175,7 @@ namespace ImageViewer
             {
                 angle = 0;
             }
-            ImageTransform(scaleList[scaleValue]);
+            ImageTransform(scaleList[scaleIndices]);
 
         }
 
@@ -198,8 +244,8 @@ namespace ImageViewer
 
             ScrollViewImage.VerticalScrollBarVisibility = ScrollBarVisibility.Disabled;
             ScrollViewImage.HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled;
-            scaleValue = 0;
-            ImageTransform(scaleList[scaleValue]);
+            scaleIndices = 0;
+            ImageTransform(scaleList[scaleIndices]);
         }
 
         /// <summary>
@@ -212,12 +258,12 @@ namespace ImageViewer
             ScrollViewImage.Width = ScrollGrid.ActualWidth;
             ScrollViewImage.Height = ScrollGrid.ActualHeight;
             ScrollViewImage.UpdateLayout();
-            if (scaleValue != 0)
+            if (scaleIndices != 0)
             {
                 return;
             }
 
-            ImageTransform(scaleList[scaleValue]);
+            ImageTransform(scaleList[scaleIndices]);
         }
 
         /// <summary>
@@ -274,6 +320,12 @@ namespace ImageViewer
 
 
         }
+
+        /// <summary>
+        /// 左クリックDown
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Grid_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             // 画像上の座標取得（拡大前の座標）
@@ -295,20 +347,24 @@ namespace ImageViewer
                 offsetHeight = (ScrollViewImage.ActualHeight - ViewImage.ActualHeight) / 2;
             }
 
-            RectDownX = p.X * scale + offsetWidth;
-            RectDownY = p.Y * scale + offsetHeight;
-            DownX = p.X * scale;
-            DownY = p.Y * scale;
+            RectDown = new Point(p.X * scale + offsetWidth, p.Y * scale + offsetHeight);
+
+            Down = new Point(p.X * scale, p.Y * scale);
 
             // 矩形初期化
-            ViewRectangle.Margin = new Thickness(RectDownX, RectDownY, 0, 0);
+            ViewRectangle.Margin = new Thickness(RectDown.X, RectDown.Y, 0, 0);
             ViewRectangle.Width = 0;
             ViewRectangle.Height = 0;
             ViewRectangle.Visibility = Visibility.Visible;
 
-            Debug.WriteLine("downX:" + DownX + " downY:" + DownY);
+            Debug.WriteLine("downX:" + Down.X + " downY:" + Down.Y);
         }
 
+        /// <summary>
+        /// 左クリックUP
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Grid_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             Point p = e.GetPosition(ViewImage);
@@ -322,6 +378,11 @@ namespace ImageViewer
 
         }
 
+        /// <summary>
+        /// マウス移動
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Grid_MouseMove(object sender, MouseEventArgs e)
         {
             if (ViewRectangle.Visibility != Visibility.Visible)
@@ -345,37 +406,42 @@ namespace ImageViewer
             double rectX = p.X * scale + offsetWidth;
             double rectY = p.Y * scale + offsetHeight;
 
-            if (rectX - RectDownX >= 0 && rectY - RectDownY >= 0)
+            if (rectX - RectDown.X >= 0 && rectY - RectDown.Y >= 0)
             {
                 // マウスダウン座標から見て右下
-                ViewRectangle.Margin = new Thickness(RectDownX, RectDownY, 0, 0);
-                ViewRectangle.Width = rectX - RectDownX;
-                ViewRectangle.Height = rectY - RectDownY;
+                ViewRectangle.Margin = new Thickness(RectDown.X, RectDown.Y, 0, 0);
+                ViewRectangle.Width = rectX - RectDown.X;
+                ViewRectangle.Height = rectY - RectDown.Y;
             }
-            else if (rectX - RectDownX < 0 && rectY - RectDownY >= 0)
+            else if (rectX - RectDown.X < 0 && rectY - RectDown.Y >= 0)
             {
                 // マウスダウン座標から見て左下
-                ViewRectangle.Margin = new Thickness(rectX, RectDownY, 0, 0);
-                ViewRectangle.Width = RectDownX - rectX;
-                ViewRectangle.Height = rectY - RectDownY;
+                ViewRectangle.Margin = new Thickness(rectX, RectDown.Y, 0, 0);
+                ViewRectangle.Width = RectDown.X - rectX;
+                ViewRectangle.Height = rectY - RectDown.Y;
             }
-            else if (rectX - RectDownX >= 0 && rectY - RectDownY < 0)
+            else if (rectX - RectDown.X >= 0 && rectY - RectDown.Y < 0)
             {
                 // マウスダウン座標から見て右上
-                ViewRectangle.Margin = new Thickness(RectDownX, rectY, 0, 0);
-                ViewRectangle.Width = rectX - RectDownX;
-                ViewRectangle.Height = RectDownY - rectY;
+                ViewRectangle.Margin = new Thickness(RectDown.X, rectY, 0, 0);
+                ViewRectangle.Width = rectX - RectDown.X;
+                ViewRectangle.Height = RectDown.Y - rectY;
             }
             else
             {
                 // マウスダウン座標から見て左上
                 ViewRectangle.Margin = new Thickness(rectX, rectY, 0, 0);
-                ViewRectangle.Width = Math.Abs(RectDownX - rectX);
-                ViewRectangle.Height = Math.Abs(RectDownY - rectY);
+                ViewRectangle.Width = Math.Abs(RectDown.X - rectX);
+                ViewRectangle.Height = Math.Abs(RectDown.Y - rectY);
             }
 
         }
 
+        /// <summary>
+        /// マウス外れる
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Grid_MouseLeave(object sender, MouseEventArgs e)
         {
             // 矩形非表示
@@ -384,12 +450,16 @@ namespace ImageViewer
             ViewRectangle.Visibility = Visibility.Hidden;
         }
 
+        /// <summary>
+        /// ドラックの拡大
+        /// </summary>
+        /// <param name="p"></param>
         private void ExpandingWithDrag(Point p)
         {
             double upX = p.X * scale;
             double upY = p.Y * scale;
-            double width = DownX > upX ? DownX - upX : upX - DownX; 
-            double height = DownY > upY ? DownY - upY : upY - DownY;
+            double width = Down.X > upX ? Down.X - upX : upX - Down.X; 
+            double height = Down.Y > upY ? Down.Y - upY : upY - Down.Y;
 
             Debug.WriteLine("width:" + width + " height:" + height);
 
@@ -410,18 +480,22 @@ namespace ImageViewer
             }
             ScrollViewImage.VerticalScrollBarVisibility = ScrollBarVisibility.Visible;
             ScrollViewImage.HorizontalScrollBarVisibility = ScrollBarVisibility.Visible;
-            SetScaleValue(s);
+            SetScaleIndices(s);
             ImageTransform(s);
 
         }
 
-        private void SetScaleValue(double s)
+        /// <summary>
+        /// スケールインデックス設定
+        /// </summary>
+        /// <param name="s"></param>
+        private void SetScaleIndices(double s)
         {
             for (int i = scaleList.Count() - 1; i >= 0; i--)
             {
                 if (s >= scaleList[i])
                 {
-                    scaleValue = i;
+                    scaleIndices = i;
                     break;
                 }
             }
