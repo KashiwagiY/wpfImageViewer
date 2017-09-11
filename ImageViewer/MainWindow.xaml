@@ -45,8 +45,13 @@
                     </Image>
                     <Rectangle  Name="ViewRectangle"
                         HorizontalAlignment="Left" VerticalAlignment="Top"
-                        StrokeDashArray="2,2" Stroke="Yellow" StrokeThickness="3"
+                        StrokeDashArray="2,2" Stroke="Red" StrokeThickness="3"
                         Visibility="Collapsed"/>
+                    <Rectangle Name="ViewPoint"
+                        HorizontalAlignment="Left" VerticalAlignment="Top"
+                        Fill="Aqua"
+                        Width="3" Height="3"
+                        />
                 </Grid>
             </ScrollViewer>
         </Grid>

@@ -49,7 +49,11 @@ namespace ImageViewer
         /// スケール計算用
         /// </summary>
         Point Down;
-        
+
+        /// <summary>
+        /// 表示中心位置
+        /// </summary>
+        Point center;
 
         public MainWindow()
         {
@@ -282,9 +286,21 @@ namespace ImageViewer
 
             ViewImage.UpdateLayout();
 
-
-            ScrollViewImage.ScrollToHorizontalOffset(ScrollViewImage.ScrollableWidth / 2);
-            ScrollViewImage.ScrollToVerticalOffset(ScrollViewImage.ScrollableHeight / 2);
+            center = ViewImage.PointToScreen(center);
+            double sv_width_2 = ScrollViewImage.ActualWidth / 2;
+            double sv_height_2 = ScrollViewImage.ActualHeight / 2;
+            double offset_x = center.X - sv_width_2;
+            double offset_y = center.Y - sv_height_2;
+            if (offset_x < 0) offset_x = 0;
+            else if ((ScrollGrid.ActualWidth - offset_x) < sv_width_2)
+                offset_x = ScrollGrid.ActualWidth - sv_width_2;
+            if (offset_y < 0) offset_y = 0;
+            else if ((ScrollGrid.ActualHeight - offset_y) < sv_height_2)
+                offset_y = ScrollGrid.ActualHeight - sv_height_2;
+            ScrollViewImage.ScrollToHorizontalOffset(offset_x);
+            ScrollViewImage.ScrollToVerticalOffset(offset_y);
+            //ScrollViewImage.ScrollToHorizontalOffset(ScrollViewImage.ScrollableWidth / 2);
+            //ScrollViewImage.ScrollToVerticalOffset(ScrollViewImage.ScrollableHeight / 2);
 
             Debug.WriteLine(" ScrollViewImage.ExtentWidth" + ScrollViewImage.ExtentWidth + " ScrollViewImage.ExtentHeight" + ScrollViewImage.ExtentHeight);
             Debug.WriteLine("");
@@ -307,17 +323,45 @@ namespace ImageViewer
         /// </summary>
         private void Set()
         {
-            if (angle == 90 || angle == 270)
+            if (ViewImage.Source == null)
             {
-                ViewImage.Width = ScrollViewImage.ActualHeight;
-                ViewImage.Height = double.NaN;
-            }
-            else
-            {
-                ViewImage.Height = ScrollViewImage.ActualHeight;
-                ViewImage.Width = double.NaN;
+                return;
             }
 
+
+            if (angle == 90 || angle == 270)
+            {
+                double w = ViewImage.Source.Height / ScrollViewImage.ActualWidth;
+                double h = ViewImage.Source.Width / ScrollViewImage.ActualHeight;
+                if (w > h)
+                {
+                    Debug.WriteLine("横基準");
+                    ViewImage.Width = double.NaN;
+                    ViewImage.Height = ScrollViewImage.ActualWidth; 
+                }
+                else
+                {
+                    Debug.WriteLine("縦基準");
+                    ViewImage.Height = double.NaN;
+                    ViewImage.Width = ScrollViewImage.ActualHeight; 
+                }
+            }else
+            {
+                double w = ViewImage.Source.Width / ScrollViewImage.ActualWidth;
+                double h = ViewImage.Source.Height / ScrollViewImage.ActualHeight;
+                if (w > h)
+                {
+                    Debug.WriteLine("横基準");
+                    ViewImage.Width = ScrollViewImage.ActualWidth;
+                    ViewImage.Height = double.NaN;
+                }
+                else
+                {
+                    Debug.WriteLine("縦基準");
+                    ViewImage.Height = ScrollViewImage.ActualHeight;
+                    ViewImage.Width = double.NaN;
+                }
+            }
 
         }
 
@@ -350,7 +394,7 @@ namespace ImageViewer
             RectDown = new Point(p.X * scale + offsetWidth, p.Y * scale + offsetHeight);
 
             Down = new Point(p.X * scale, p.Y * scale);
-
+            
             // 矩形初期化
             ViewRectangle.Margin = new Thickness(RectDown.X, RectDown.Y, 0, 0);
             ViewRectangle.Width = 0;
@@ -358,6 +402,8 @@ namespace ImageViewer
             ViewRectangle.Visibility = Visibility.Visible;
 
             Debug.WriteLine("downX:" + Down.X + " downY:" + Down.Y);
+
+            ViewPoint.Visibility = Visibility.Visible;
         }
 
         /// <summary>
@@ -435,6 +481,13 @@ namespace ImageViewer
                 ViewRectangle.Height = Math.Abs(RectDown.Y - rectY);
             }
 
+            double width = RectDown.X > rectX ? RectDown.X - rectX : rectX - RectDown.X;
+            double height = RectDown.Y > rectY ? RectDown.Y - rectY : rectY - RectDown.Y;
+            double centerX = RectDown.X + ((RectDown.X > rectX ? -width : width) / 2);
+            double centerY = RectDown.Y + ((RectDown.Y > rectY ? -height : height) / 2);
+            center = new Point(centerX, centerY);
+            ViewPoint.Margin = new Thickness(center.X, center.Y, 0, 0);
+
         }
 
         /// <summary>
@@ -463,8 +516,13 @@ namespace ImageViewer
 
             Debug.WriteLine("width:" + width + " height:" + height);
 
+            int gcd = Gcd((int)width, (int)height);
+            int acpectX = (int)(width / gcd);
+            int acpectY = (int)(height / gcd);
+
+
             double s;
-            if (width > height)
+            if (acpectX > acpectY)
             {
                 s = ScrollViewImage.ExtentWidth / width;
             }
@@ -478,6 +536,7 @@ namespace ImageViewer
                 s = scaleList[scaleList.Count() - 1];
                 return;
             }
+
             ScrollViewImage.VerticalScrollBarVisibility = ScrollBarVisibility.Visible;
             ScrollViewImage.HorizontalScrollBarVisibility = ScrollBarVisibility.Visible;
             SetScaleIndices(s);
@@ -499,6 +558,22 @@ namespace ImageViewer
                     break;
                 }
             }
+        }
+
+        private int Gcd(int a, int b)
+        {
+            if (a < b)
+            {
+                return Gcd(b, a);
+            }
+
+            while (b != 0)
+            {
+                int r = a % b;
+                a = b;
+                b = r;
+            }
+            return a;
         }
     }
 }
